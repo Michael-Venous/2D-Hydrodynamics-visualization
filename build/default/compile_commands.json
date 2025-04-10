@@ -1,0 +1,44 @@
+[
+{
+  "directory": "/home/bullcrap/Documents/code/fluid/build/default",
+  "command": "/usr/bin/cc  -I/home/bullcrap/Documents/code/fluid/include -g -o CMakeFiles/glad.dir/src/glad.c.o -c /home/bullcrap/Documents/code/fluid/src/glad.c",
+  "file": "/home/bullcrap/Documents/code/fluid/src/glad.c",
+  "output": "CMakeFiles/glad.dir/src/glad.c.o"
+},
+{
+  "directory": "/home/bullcrap/Documents/code/fluid/build/default",
+  "command": "/usr/bin/c++  -I/home/bullcrap/Documents/code/fluid/header -I/home/bullcrap/Documents/code/fluid/include -g -std=gnu++17 -o CMakeFiles/opengl_program.dir/src/EBO.cpp.o -c /home/bullcrap/Documents/code/fluid/src/EBO.cpp",
+  "file": "/home/bullcrap/Documents/code/fluid/src/EBO.cpp",
+  "output": "CMakeFiles/opengl_program.dir/src/EBO.cpp.o"
+},
+{
+  "directory": "/home/bullcrap/Documents/code/fluid/build/default",
+  "command": "/usr/bin/c++  -I/home/bullcrap/Documents/code/fluid/header -I/home/bullcrap/Documents/code/fluid/include -g -std=gnu++17 -o CMakeFiles/opengl_program.dir/src/Particle.cpp.o -c /home/bullcrap/Documents/code/fluid/src/Particle.cpp",
+  "file": "/home/bullcrap/Documents/code/fluid/src/Particle.cpp",
+  "output": "CMakeFiles/opengl_program.dir/src/Particle.cpp.o"
+},
+{
+  "directory": "/home/bullcrap/Documents/code/fluid/build/default",
+  "command": "/usr/bin/c++  -I/home/bullcrap/Documents/code/fluid/header -I/home/bullcrap/Documents/code/fluid/include -g -std=gnu++17 -o CMakeFiles/opengl_program.dir/src/VAO.cpp.o -c /home/bullcrap/Documents/code/fluid/src/VAO.cpp",
+  "file": "/home/bullcrap/Documents/code/fluid/src/VAO.cpp",
+  "output": "CMakeFiles/opengl_program.dir/src/VAO.cpp.o"
+},
+{
+  "directory": "/home/bullcrap/Documents/code/fluid/build/default",
+  "command": "/usr/bin/c++  -I/home/bullcrap/Documents/code/fluid/header -I/home/bullcrap/Documents/code/fluid/include -g -std=gnu++17 -o CMakeFiles/opengl_program.dir/src/VBO.cpp.o -c /home/bullcrap/Documents/code/fluid/src/VBO.cpp",
+  "file": "/home/bullcrap/Documents/code/fluid/src/VBO.cpp",
+  "output": "CMakeFiles/opengl_program.dir/src/VBO.cpp.o"
+},
+{
+  "directory": "/home/bullcrap/Documents/code/fluid/build/default",
+  "command": "/usr/bin/c++  -I/home/bullcrap/Documents/code/fluid/header -I/home/bullcrap/Documents/code/fluid/include -g -std=gnu++17 -o CMakeFiles/opengl_program.dir/src/shaderClass.cpp.o -c /home/bullcrap/Documents/code/fluid/src/shaderClass.cpp",
+  "file": "/home/bullcrap/Documents/code/fluid/src/shaderClass.cpp",
+  "output": "CMakeFiles/opengl_program.dir/src/shaderClass.cpp.o"
+},
+{
+  "directory": "/home/bullcrap/Documents/code/fluid/build/default",
+  "command": "/usr/bin/c++  -I/home/bullcrap/Documents/code/fluid/header -I/home/bullcrap/Documents/code/fluid/include -g -std=gnu++17 -o CMakeFiles/opengl_program.dir/main.cpp.o -c /home/bullcrap/Documents/code/fluid/main.cpp",
+  "file": "/home/bullcrap/Documents/code/fluid/main.cpp",
+  "output": "CMakeFiles/opengl_program.dir/main.cpp.o"
+}
+]
