@@ -12,11 +12,10 @@ std::vector<Particle> generateUniformGridParticles(int numParticles, float minX,
         for (int j = 0; j < particlesPerRow; ++j)
         {
             glm::vec2 position(minX + i * spacingX, minY + j * spacingY);
-            glm::vec2 velocity(0.0f, 0.0f); // Initial velocity is zero
+            glm::vec2 velocity(0.0f, 0.0f);
             particles.emplace_back(position, velocity);
         }
     }
-
     return particles;
 }
 
@@ -44,8 +43,8 @@ std::vector<Particle> generateParticles(int numParticles, float minX, float maxX
     return particles;
 }
 
-Simulation::Simulation(float rad, float mas, float damp)
-    : radius(rad), mass(mas), damping(damp), targetDensity(200.0f), pressureMultiplier(50.0f), gravity(0.0f, -9.81f)
+Simulation::Simulation(float rad, float mas, float damp, float targetDens, float pressureMult)
+    : radius(rad), mass(mas), damping(damp), targetDensity(targetDens), pressureMultiplier(pressureMult), gravity(0.0f, -9.81f)
 {
     // Precompute constants for the smoothing kernel
     poly6KernelConstant = 4.0f / (M_PI * pow(radius, 8));
@@ -54,7 +53,10 @@ Simulation::Simulation(float rad, float mas, float damp)
 
 void Simulation::updateParticles(std::vector<Particle> &particles, float deltaTime, glm::vec3 mouseVector)
 {
+    // Clamp deltaTime to prevent instability
+    deltaTime = std::clamp(deltaTime, 0.001f, 0.033f);
 
+    // Calculate predicted positions first
     for (auto &particle : particles)
     {
         particle.predictedPosition = particle.position + particle.velocity * deltaTime;
@@ -65,34 +67,36 @@ void Simulation::updateParticles(std::vector<Particle> &particles, float deltaTi
 
     for (auto &particle : particles)
     {
-        // Apply the mouse force (vector) to the particle's velocity
-        glm::vec2 mousePos = glm::vec2(mouseVector.x, mouseVector.y); // Only use x, y for position
-        float mouseForce = mouseVector.z;                             // Use z-component of the mouseVector for force magnitude
+        // Calculate acceleration including mouse force
+        glm::vec2 acceleration = particle.pressureAcceleration + gravity;
 
-        // Calculate the direction vector from the particle to the mouse position
-        glm::vec2 mouseForceVec = mousePos - particle.position;
-        float distance = glm::length(mouseForceVec); // Calculate the distance to the mouse position
-
-        // If the particle is within a reasonable distance from the mouse, apply force
-        if (distance < 2.0f)
-        {                                                  // You can adjust this threshold to control the influence range
-            mouseForceVec = glm::normalize(mouseForceVec); // Normalize to get the direction
-
-            // Scale the force vector by the mouse force magnitude and inverse of distance
-            if (mouseForce > 0)
-            {
-                particle.velocity += mouseForceVec * (mouseForce / distance); // Attraction
-            }
-            else
-            {
-                particle.velocity -= mouseForceVec * (-mouseForce / distance); // Repulsion
-            }
+        // Apply mouse force as acceleration BEFORE Verlet integration
+        const float mouseRadius = 1.0f;
+        glm::vec2 mousePos(mouseVector.x, mouseVector.y);
+        glm::vec2 toMouse = mousePos - particle.position;
+        float distance = glm::length(toMouse);
+        if (distance < mouseRadius && distance > 0.01f)
+        {
+            float normalizedDist = distance / mouseRadius;
+            float falloff = (1.0f - normalizedDist * normalizedDist);
+            float mouseAccel = mouseVector.z * 50.0f * falloff / (distance + 0.1f);
+            acceleration += glm::normalize(toMouse) * mouseAccel;
         }
 
-        particle.velocity += particle.pressureAcceleration * deltaTime;
+        // Verlet integration with acceleration
+        glm::vec2 newPosition = 2.0f * particle.position - particle.previousPosition + acceleration * deltaTime * deltaTime;
+
+        // Update velocity
+        particle.velocity = (newPosition - particle.previousPosition) / (2.0f * deltaTime);
         particle.velocity *= damping;
-        particle.velocity += gravity * deltaTime;
-        particle.position += particle.velocity * deltaTime;
+        constexpr float maxVel = 5.0f;
+        particle.velocity = glm::clamp(particle.velocity,
+                                       glm::vec2(-maxVel),
+                                       glm::vec2(maxVel));
+
+        // Update positions
+        particle.previousPosition = particle.position;
+        particle.position = newPosition;
 
         boundaryCondition(particle);
     }
@@ -100,43 +104,44 @@ void Simulation::updateParticles(std::vector<Particle> &particles, float deltaTi
 
 void Simulation::boundaryCondition(Particle &particle)
 {
-    float minX = -1.0f, maxX = 1.0f;
-    float minY = -1.0f, maxY = 1.0f;
-    constexpr float boundaryDamping = 0.5f; // Energy loss on collision (0.5 = 50% velocity retained)
-    // X-axis collision
-    if (particle.position.x < minX)
-    {
-        // Clamp position to boundary
-        particle.position.x = minX;
-        // Reflect velocity with damping
-        particle.velocity.x *= -boundaryDamping;
-    }
-    else if (particle.position.x > maxX)
-    {
-        particle.position.x = maxX;
-        particle.velocity.x *= -boundaryDamping;
-    }
+    const float minX = -1.0f, maxX = 1.0f;
+    const float minY = -1.0f, maxY = 1.0f;
+    constexpr float boundaryDamping = 0.5f;
+    constexpr float boundaryPush = 0.02f;
+    constexpr float eps = 0.001f; // For position comparisons
 
-    // Y-axis collision
-    if (particle.position.y < minY)
+    // Helper function for axis-aligned boundary handling
+    auto handleAxis = [&](float &pos, float &prevPos, float minVal, float maxVal)
     {
-        particle.position.y = minY;
-        particle.velocity.y *= -boundaryDamping;
-    }
-    else if (particle.position.y > maxY)
-    {
-        particle.position.y = maxY;
-        particle.velocity.y *= -boundaryDamping;
-    }
-    constexpr float boundaryPush = 0.05f;
-    if (particle.position.x == minX)
-        particle.velocity.x += boundaryPush;
-    if (particle.position.x == maxX)
-        particle.velocity.x -= boundaryPush;
-    if (particle.position.y == minY)
-        particle.velocity.y += boundaryPush;
-    if (particle.position.y == maxY)
-        particle.velocity.y -= boundaryPush;
+        const float span = maxVal - minVal;
+
+        // Check left boundary
+        if (pos < minVal - eps)
+        {
+            const float overshoot = minVal - pos;
+            pos = minVal + overshoot * boundaryDamping;
+            prevPos = pos; // Reset previous position to prevent velocity spikes
+        }
+        // Check right boundary
+        else if (pos > maxVal + eps)
+        {
+            const float overshoot = pos - maxVal;
+            pos = maxVal - overshoot * boundaryDamping;
+            prevPos = pos;
+        }
+        // Gentle boundary push for particles near edges
+        else if (pos < minVal + eps)
+        {
+            particle.velocity.x += boundaryPush;
+        }
+        else if (pos > maxVal - eps)
+        {
+            particle.velocity.x -= boundaryPush;
+        }
+    };
+
+    handleAxis(particle.position.x, particle.previousPosition.x, minX, maxX);
+    handleAxis(particle.position.y, particle.previousPosition.y, minY, maxY);
 }
 
 // precomputes the density
@@ -178,8 +183,8 @@ void Simulation::calculatePressureForce(std::vector<Particle> &particles)
 
             float pressure_i = std::max((particle.density - targetDensity) * pressureMultiplier, 0.0f);
             float pressure_j = std::max((particleCheck.density - targetDensity) * pressureMultiplier, 0.0f);
-            float avgPressure = (pressure_i + pressure_j) / 2.0f;
-            pressureForce += -direction * (avgPressure * influence * mass / particleCheck.density);
+            float pressureTerm = (pressure_i / (particle.density * particle.density) + pressure_j / (particleCheck.density * particleCheck.density));
+            pressureForce += -direction * (mass * pressureTerm * influence);
         }
         particle.pressureAcceleration = pressureForce / particle.density;
     }

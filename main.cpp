@@ -70,13 +70,15 @@ int main()
 	VBO1.Unbind();
 
 	// Set up the simulation parameters
-	float mass = 1.0f;		  // Mass of the particles
-	float damping = 1.0f;	  // Damping multiplier
-	float timeStep = 0.003f;  // Time step for the simulation
-	float radius = 0.08f;	  // Radius of the particles
-	float mouseForce = 0.02f; // Mouse force multiplier
+	float mass = 1.0f;					 // Mass of the particles
+	float damping = 1.0f;				 // Damping multiplier
+	float timeStep = 0.003f;			 // Time step for the simulation
+	float radius = 0.05f;				 // Radius of the particles
+	float targetDensity = 1.0f;			 // Target density for the particles
+	float pressureMultiplier = 10000.0f; // Pressure multiplier
+	float mouseForce = 0.2f;			 // Mouse force multiplier
 
-	Simulation simulation = Simulation(radius, mass, damping);
+	Simulation simulation = Simulation(radius, mass, damping, targetDensity, pressureMultiplier);
 
 	std::vector<Particle> particles = generateParticles(500, -0.5, 0.5, -0.5, 0.5);
 	// Main while loop
