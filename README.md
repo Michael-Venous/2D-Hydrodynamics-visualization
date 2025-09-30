@@ -2,7 +2,7 @@
 
 A real-time 2D Smoothed Particle Hydrodynamics (SPH) fluid simulation implemented in C++ with OpenGL for visualization.
 
-![Simulation Preview]([demo.gif](https://github.com/user-attachments/assets/ac03922a-1967-4c6e-b1be-ffaa5d3bc5bd))
+![Simulation Preview](https://github.com/user-attachments/assets/ac03922a-1967-4c6e-b1be-ffaa5d3bc5bd)
 
 ## Features
 
