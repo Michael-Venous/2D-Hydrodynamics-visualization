@@ -46,12 +46,6 @@ build\Release\opengl_program.exe
 - **Left Click**: Attract particles to cursor
 - **Right Click**: Repel particles from cursor
 
-## Implementation Highlights
-
-- Custom SPH solver with density and pressure force calculations
-- Efficient neighbor particle searching
-- Adaptive boundary conditions with position correction
-- Shader-based rendering with per-particle transformations
 
 ## Inspiration
 
